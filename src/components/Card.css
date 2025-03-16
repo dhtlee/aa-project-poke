@@ -1,0 +1,15 @@
+.card-content {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image {
+  display: flex;
+  justify-content: center;;
+  padding: 1.2rem;
+  background-color: #DCDCDD;
+  margin-bottom: 0.8rem;
+}

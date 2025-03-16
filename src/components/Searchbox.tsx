@@ -1,5 +1,7 @@
 import MagnifyingGlass from "../image/magnifying-glass";
 
+import './SearchBox.css';
+
 const SearchBox = () => {
   return (
     <div className="search-box">

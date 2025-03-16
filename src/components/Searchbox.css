@@ -1,0 +1,20 @@
+.search-box {
+  display: flex;
+  justify-content: center;
+  align-self: center;
+  flex-direction: column;
+  max-width: 80%;
+  width: 100%;
+  
+  svg {
+    position: absolute;
+    padding-left: 0.8rem;
+  }
+
+  input {
+    border: 0;
+    outline: 0;
+    padding-left: 2.4rem;
+    height: 3.2rem;
+  }
+}
