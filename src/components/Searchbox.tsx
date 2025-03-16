@@ -4,7 +4,7 @@ import { useDebounce } from 'use-debounce';
 
 import MagnifyingGlass from "../image/magnifying-glass";
 
-import './SearchBox.css';
+import './Searchbox.css';
 
 type SearchBoxProps = {
   onSearch: (searchTerm: string) => void;
@@ -25,7 +25,7 @@ const SearchBox = ({ onSearch }: SearchBoxProps) => {
 
   return (
     <div className="search-box">
-      <MagnifyingGlass />
+      <MagnifyingGlass className="magnifying-glass-icon"/>
       <input
         type="text"
         placeholder="Search"
