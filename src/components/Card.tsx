@@ -11,9 +11,25 @@ type CardProps = {
 const Card = ({ pokemon }: CardProps) => {
   const navigate = useNavigate();
 
+  const handleClick = () => {
+    navigate(`/pokemon/${pokemon.id}`);
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleClick();
+    }
+  }
+
   return (
     <div className="card-content">
-      <div role="button" className="card-image" onClick={() => navigate(`/pokemon/${pokemon.id}`)}>
+      <div
+        tabIndex={0}
+        role="button"
+        className="card-image"
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+      >
         <Artwork pokemon={pokemon} />
       </div>
       <h6>{pokemon.name}</h6>
