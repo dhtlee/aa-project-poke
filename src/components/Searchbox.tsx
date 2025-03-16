@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useDebounce } from 'use-debounce';
+import React, { useState, useEffect } from 'react';
 
 import MagnifyingGlass from "../image/magnifying-glass";
 
@@ -8,32 +6,33 @@ import './Searchbox.css';
 
 type SearchBoxProps = {
   onSearch: (searchTerm: string) => void;
+  initialValue?: string;
 }
 
-const SearchBox = ({ onSearch }: SearchBoxProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [debouncedQuery] = useDebounce(searchParams.get('query'), 300);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchParams(query ? { query } : {});
-  };
+const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, initialValue = '' }) => {
+  const [searchTerm, setSearchTerm] = useState(initialValue);
 
   useEffect(() => {
-    onSearch(debouncedQuery || '');
-  }, [debouncedQuery, onSearch]);
+    setSearchTerm(initialValue);
+  }, [initialValue]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    onSearch(value);
+  };
 
   return (
     <div className="search-box">
-      <MagnifyingGlass className="magnifying-glass-icon"/>
+      <MagnifyingGlass className="magnifying-glass-icon" />
       <input
         type="text"
         placeholder="Search"
-        value={searchParams.get('query') || ''}
+        value={searchTerm}
         onChange={handleChange}
       />
     </div>
   );
-}
+};
 
 export default SearchBox;

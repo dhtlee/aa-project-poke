@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Routes, Route, useLocation, Link } from 'react-router-dom';
 
+import pokedex from '../pokedex.json';
+
 import Favorites from './components/Favorites';
 import { FavoritesProvider } from './context/FavoritesContext';
 import PokemonLogo from "./image/pokemon-logo";
@@ -8,6 +10,7 @@ import PokemonDetails from './pages/PokemonDetailsPage';
 import PokemonFavorites from './pages/PokemonFavorites';
 import PokemonList from './pages/PokemonListPage';
 import { Pokemon } from './types/PokemonSummary';
+import { PokemonTrie } from './utils/Trie';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
@@ -27,20 +30,14 @@ type PokemonList = {
 export default function App() {
   const [pokemons, setPokemons] = useState<PokemonSummary[]>([]);
   const location = useLocation();
+  const [pokemonTrie] = useState<PokemonTrie>(new PokemonTrie());
 
   useEffect(() => {
-    fetch('https://pokeapi.co/api/v2/pokemon?limit=-1')
-      .then((response) => response.json())
-      .then((data: PokemonList) => {
-        setPokemons(data.results);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
+    setPokemons(pokedex.results)
   }, [])
 
   const normalizedPokemons = useMemo(() => {
-    return pokemons.sort(
+    const normalized = pokemons.sort(
       (first, second) => first.name.localeCompare(second.name)
     ).map(pokemon => {
       const id = Number(pokemon.url.split('/')[6]);
@@ -54,7 +51,13 @@ export default function App() {
         imageUrl,
       } as Pokemon;
     });
-  }, [pokemons]);
+    
+    // Initialize the trie with all normalized pokemons
+    pokemonTrie.setAllPokemons(normalized);
+    pokemonTrie.bulkInsert(normalized);
+    
+    return normalized;
+  }, [pokemons, pokemonTrie]);
 
   return (
     <FavoritesProvider>
@@ -68,8 +71,7 @@ export default function App() {
       </header>
       <main className="main-container" style={{ backgroundColor: /^\/pokemon\/\d+$/.test(location.pathname) ? 'white' : undefined }}>
         <Routes>
-          <Route path="/" element={
-            <PokemonList pokemons={normalizedPokemons} />} />
+          <Route path="/" element={<PokemonList pokemons={normalizedPokemons} pokemonTrie={pokemonTrie} />} />
           <Route path="/pokemon/:id" element={<PokemonDetails />} />
           <Route path="/favorites" element={<PokemonFavorites />} />
         </Routes>

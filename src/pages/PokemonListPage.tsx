@@ -1,33 +1,33 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import Card from "../components/Card";
 import PaginationRange from '../components/PaginationRange';
 import SearchBox from '../components/Searchbox';
 import { Pokemon } from "../types/PokemonSummary";
+import { PokemonTrie } from "../utils/Trie";
 
 import './PokemonListPage.css';
 
 type PokemonListPageProps = {
   pokemons: Pokemon[];
+  pokemonTrie: PokemonTrie;
 };
 
 const NUM_POKEMONS_PER_PAGE = 16;
 
-const PokemonListPage = ({ pokemons }: PokemonListPageProps) => {
+const PokemonListPage = ({ pokemons, pokemonTrie }: PokemonListPageProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [displayedPokemons, setDisplayedPokemons] = useState<Pokemon[]>([]);
   const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const searchQuery = searchParams.get('query') || '';
 
-  const totalPages = useMemo(() => {
-    if (searchParams.get('query')) {
-      return Math.ceil(filteredPokemons.length / NUM_POKEMONS_PER_PAGE);
-    } else {
-      return Math.ceil(pokemons.length / NUM_POKEMONS_PER_PAGE);
-    }
-  }, [displayedPokemons]);
+  const totalPages = useCallback(() => {
+    const totalItems = searchQuery ? filteredPokemons.length : pokemons.length;
+    return Math.ceil(totalItems / NUM_POKEMONS_PER_PAGE);
+  }, [filteredPokemons, pokemons, searchQuery]);
 
   const handlePageChange = (page: number) => {
     searchParams.set('page', page.toString());
@@ -35,48 +35,53 @@ const PokemonListPage = ({ pokemons }: PokemonListPageProps) => {
   };
 
   const handleSearch = useCallback((searchTerm: string) => {
+    searchParams.set('query', searchTerm);
+    searchParams.delete('page'); // Reset to first page on new search
+    setSearchParams(searchParams);
+    
     if (searchTerm === '') {
+      // Reset to showing all pokemons (first page)
       const paginatedPokemons = pokemons.slice(0, NUM_POKEMONS_PER_PAGE);
+      setFilteredPokemons([]);
       setDisplayedPokemons(paginatedPokemons);
     } else {
-      const filteredPokemons = pokemons.filter(pokemon => {
-        const name = pokemon.name.toLowerCase();
-        const search = searchTerm.toLowerCase();
-        return name.includes(search);
-      });
-      const filteredPaginatedPokemons = filteredPokemons.slice(0, NUM_POKEMONS_PER_PAGE);
-      setFilteredPokemons(filteredPokemons);
-      setDisplayedPokemons(filteredPaginatedPokemons);
+      // Use the Trie to search for matching pokemons
+      const matchedPokemons = pokemonTrie.search(searchTerm);
+      setFilteredPokemons(matchedPokemons);
+      
+      // Display the first page of results
+      const paginatedResults = matchedPokemons.slice(0, NUM_POKEMONS_PER_PAGE);
+      setDisplayedPokemons(paginatedResults);
     }
-  }, [pokemons, searchParams]);
+  }, [pokemons, searchParams, setSearchParams, pokemonTrie]);
 
   useEffect(() => {
-    // if search query is present, use filtered pokemons as dataset, else use all pokemons
-    // if page query is present, find start and end index of the paginated pokemons
-    if (!searchParams.get('query') && !searchParams.get('page')) {
-      const paginatedPokemons = pokemons.slice(0, NUM_POKEMONS_PER_PAGE);
-      setDisplayedPokemons(paginatedPokemons);
-    } else if (searchParams.get('query') && !searchParams.get('page')) {
-      const paginatedPokemons = filteredPokemons.slice(0, NUM_POKEMONS_PER_PAGE);
-      setDisplayedPokemons(paginatedPokemons);
-    } else if (!searchParams.get('query') && searchParams.get('page')) {
+    // Initialize search if query parameter is present
+    const query = searchParams.get('query') || '';
+    if (query) {
+      handleSearch(query);
+    } else {
+      // Paginate from all pokemons
       const page = parseInt(searchParams.get('page') || '1', 10);
       const startIndex = (page - 1) * NUM_POKEMONS_PER_PAGE;
       const endIndex = startIndex + NUM_POKEMONS_PER_PAGE;
       const paginatedPokemons = pokemons.slice(startIndex, endIndex);
       setDisplayedPokemons(paginatedPokemons);
-    } else if (searchParams.get('query') && searchParams.get('page')) {
-      const page = parseInt(searchParams.get('page') || '1', 10);
-      const startIndex = (page - 1) * NUM_POKEMONS_PER_PAGE;
-      const endIndex = startIndex + NUM_POKEMONS_PER_PAGE;
-      const paginatedPokemons = filteredPokemons.slice(startIndex, endIndex);
-      setDisplayedPokemons(paginatedPokemons);
     }
-  }, [pokemons, filteredPokemons, searchParams])
+  }, [pokemons, searchParams, handleSearch]);
+
+  // Handle pagination changes when page changes
+  useEffect(() => {
+    const dataset = searchQuery ? filteredPokemons : pokemons;
+    const startIndex = (currentPage - 1) * NUM_POKEMONS_PER_PAGE;
+    const endIndex = startIndex + NUM_POKEMONS_PER_PAGE;
+    const paginatedPokemons = dataset.slice(startIndex, endIndex);
+    setDisplayedPokemons(paginatedPokemons);
+  }, [currentPage, filteredPokemons, pokemons, searchQuery]);
 
   return (
     <div className="pokemon-list-container">
-      <SearchBox onSearch={handleSearch} />
+      <SearchBox onSearch={handleSearch} initialValue={searchQuery} />
       <div className="card-container">
         {displayedPokemons.map(pokemon => (
           <Card key={pokemon.id} pokemon={pokemon} />
@@ -85,7 +90,7 @@ const PokemonListPage = ({ pokemons }: PokemonListPageProps) => {
       <div className="pagination-container">
         <PaginationRange
           currentPage={currentPage}
-          totalPages={totalPages}
+          totalPages={totalPages()}
           onPageChange={handlePageChange}
         />
       </div>
