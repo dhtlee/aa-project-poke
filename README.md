@@ -2,9 +2,16 @@
 
 Demo: https://aa-project-poke.vercel.app
 
+## Local development
+
+1. Clone repo
+2. Build image: `docker build -t aa-project-poke .`
+3. Run image: `docker run -d -p 8080:80 --name poke-container aa-project-poke`
+4. Launch browser and navigate to `http://localhost:8080`
+
 ## AgencyAnalytics Frontend React Challenge!
 
-Below are the pieces of technology that we have added into this repository for you with a little description.
+Below are the pi  eces of technology that we have added into this repository for you with a little description.
 
 [React](https://reactjs.org/) is a popular JavaScript library for building user interfaces. The whole app will be built on this, feel free to check out the docs!
 
