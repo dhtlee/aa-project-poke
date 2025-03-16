@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
 
-import PokemonList from './pages/PokemonListPage';
-import PokemonDetails from './pages/PokemonDetailsPage';
-import { Pokemon } from './types/PokemonSummary';
+import Favorites from './components/Favorites';
+import { FavoritesProvider } from './context/FavoritesContext';
 import PokemonLogo from "./image/pokemon-logo";
+import PokemonDetails from './pages/PokemonDetailsPage';
+import PokemonFavorites from './pages/PokemonFavorites';
+import PokemonList from './pages/PokemonListPage';
+import { Pokemon } from './types/PokemonSummary';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
@@ -54,16 +57,23 @@ export default function App() {
   }, [pokemons]);
 
   return (
-    <>
+    <FavoritesProvider>
       <header className="header-container">
-        <PokemonLogo className="pokemon-logo" />
+        <Link to="/">
+          <PokemonLogo className="pokemon-logo" />
+        </Link>
+        <Link className="nav-favorites" to="/favorites" >
+          <Favorites />
+        </Link>
       </header>
       <main className="main-container" style={{ backgroundColor: /^\/pokemon\/\d+$/.test(location.pathname) ? 'white' : undefined }}>
         <Routes>
-          <Route path="/" element={<PokemonList pokemons={normalizedPokemons} />} />
+          <Route path="/" element={
+            <PokemonList pokemons={normalizedPokemons} />} />
           <Route path="/pokemon/:id" element={<PokemonDetails />} />
+          <Route path="/favorites" element={<PokemonFavorites />} />
         </Routes>
       </main >
-    </>
+    </FavoritesProvider>
   )
 }
