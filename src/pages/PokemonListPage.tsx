@@ -51,6 +51,8 @@ const PokemonListPage = ({ pokemons }: PokemonListPageProps) => {
   }, [pokemons, searchParams]);
 
   useEffect(() => {
+    // if search query is present, use filtered pokemons as dataset, else use all pokemons
+    // if page query is present, find start and end index of the paginated pokemons
     if (!searchParams.get('query') && !searchParams.get('page')) {
       const paginatedPokemons = pokemons.slice(0, NUM_POKEMONS_PER_PAGE);
       setDisplayedPokemons(paginatedPokemons);

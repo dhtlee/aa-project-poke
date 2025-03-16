@@ -9,6 +9,21 @@ Demo: https://aa-project-poke.vercel.app
 3. Run image: `docker run -d -p 8080:80 --name poke-container aa-project-poke`
 4. Launch browser and navigate to `http://localhost:8080`
 
+## Assumptions
+1. API will always work, i.e. error boundaries not implemented
+2. Size of pokemon data remain relatively consistent over time, i.e. ~1300 pokemons
+
+## Decisions
+1. Used mostly vanilla css except for Breadcrumbs and Pagination Bootstrap components for quicker dev
+2. Used debounce for pokemon search
+3. Normalized data in an array for search to prioritize user experience. Trie data structure is implemented in a separate branch but user loses the ability to search for keywords in middle of words (e.g. abra will return only abra and not crabrawler and kadabra)
+
+
+## Enhancements
+1. Saving search query and page number via URL and loading
+2. Adding pokemon to favorite list
+
+
 ## AgencyAnalytics Frontend React Challenge!
 
 Below are the pi  eces of technology that we have added into this repository for you with a little description.
