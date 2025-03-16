@@ -16,8 +16,14 @@ Demo: https://aa-project-poke.vercel.app
 ## Decisions
 1. Used mostly vanilla css except for Breadcrumbs and Pagination Bootstrap components for quicker dev
 2. Used debounce for pokemon search
-3. Normalized data in an array for search to prioritize user experience. Trie data structure is implemented in a separate branch but user loses the ability to search for keywords in middle of words (e.g. abra will return only abra and not crabrawler and kadabra)
+3. Normalized data is in an array data structure
 
+## Why array data structure?
+The mock up shows that the pokemons are sorted in alphabetically order based on pokemon names. Since pokeapi does not have an endpoint that allows fetches ordered by name, the only way is to fetch all 1302 of them, then sort them on client-side. This also means as per the requirements, I am unable to use the api's `limit` and `offset` query, and rely on `next` response property to manage pagination.
+
+Thus, pagination is handled entirely on client-side based on the sorted pokemon data, which an array data structure is a reasonable choice as it maintains order.
+
+For search feature, trie data structure was experimented on, but the tradeoff is that user loses the ability to search for keywords in middle of words (e.g. abra will return only `abra` and will not return `crabrawler` nor `kadabra`). I personally feel that this tradeoff of maintaining an additional data structure was not worth it, considering that the pokemon list database will not likely scale up drastically.
 
 ## Enhancements
 1. Saving search query and page number via URL and loading
