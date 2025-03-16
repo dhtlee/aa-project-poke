@@ -4,7 +4,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import PokemonList from './pages/PokemonListPage';
 import PokemonDetails from './pages/PokemonDetailsPage';
 import { Pokemon } from './types/PokemonSummary';
-import PokemonLogo from "./image/pokemon";
+import PokemonLogo from "./image/pokemon-logo";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
@@ -30,8 +30,7 @@ export default function App() {
       .then((response) => response.json())
       .then((data: PokemonList) => {
         setPokemons(data.results);
-      }
-      )
+      })
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
